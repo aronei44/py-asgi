@@ -15,3 +15,8 @@ async def echo(request):
 @app.route("GET", "/users/{id}")
 async def get_user(id):
     return Response(f"user id = {id}".encode())
+
+@app.route("GET", "/search")
+async def search(q, page="1"):
+    msg = f"q={q}, page={page}"
+    return Response(msg.encode())

@@ -1,4 +1,6 @@
 import json
+from urllib.parse import parse_qs
+
 class Request:
     def __init__(self, scope, receive):
         self.scope = scope
@@ -14,8 +16,10 @@ class Request:
         return self.scope["path"]
 
     @property
-    def query_string(self):
-        return self.scope.get("query_string", b"").decode()
+    def query_params(self):
+        raw = self.scope.get("query_string", b"")
+        parsed = parse_qs(raw.decode())
+        return {k: v[0] for k, v in parsed.items()}
 
     async def body(self):
         if self._body is None:
