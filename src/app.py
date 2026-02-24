@@ -126,3 +126,6 @@ class App:
             await self.handle_websocket(scope, receive, send)
         else:
             return
+
+    def include_router(self, router, prefix=""):
+        self.router.include_router(router, prefix)

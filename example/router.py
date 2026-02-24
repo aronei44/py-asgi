@@ -1,71 +1,57 @@
+from example.bg import send_email
 from example.schema import UserIn
-from src.app import App
+from example.state import get_profile
 from src.background import BackgroundTask
 from src.depends import Depends
 from src.exceptions import NotFound
 from src.request import Request
 from src.response import Response
+from src.router import Router
 
-from example.bg import send_email
-from example.middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
-from example.state import get_profile
 
-app = App()
-app.add_middleware(logger_middleware)
-app.add_middleware(timing_middleware)
-app.add_middleware(test_state_middleware)
-app.add_middleware(auth_middleware)
+router = Router()
 
-@app.route("GET", "/")
+
+@router.get("/")
 async def index(request):
     return Response(b"Hello Router")
 
-@app.route("POST", "/echo")
+@router.post("/echo")
 async def echo(request: Request):
     body = await request.body()
     return Response(body)
 
-@app.route("GET", "/users/{id}")
+@router.get("/users/{id}")
 async def get_users(id):
     if id != "1":
         raise NotFound("user not found")
 
     return Response(b"user 1")
 
-@app.route("GET", "/search")
+@router.get("/search")
 async def search(q, page="1"):
     msg = f"q={q}, page={page}"
     return Response(msg.encode())
 
-@app.route("GET", "/state-test")
+@router.get("/state-test")
 async def state_test():
     # request belum diinject ke handler param
     # kita baca langsung dari middleware effect via closure
     return Response(b"OK")
 
-@app.route("GET", "/me")
+@router.get("/me")
 async def me(profile=Depends(get_profile)):
     return Response(profile.encode())
 
-@app.route("POST", "/register")
+@router.post("/register")
 async def register():
     return Response(
         b"registered",
         background=BackgroundTask(send_email, to="test@mail.com")
     )
 
-@app.route("POST", "/users")
+@router.post("/users")
 async def create_user(payload: UserIn):
     return Response(
         f"{payload.name}:{payload.age}".encode()
     )
-
-@app.websocket("/ws")
-async def ws_handler(ws):
-    await ws.accept()
-
-    while True:
-        msg = await ws.receive_text()
-        if msg is None:
-            break
-        await ws.send_text(f"echo: {msg}")

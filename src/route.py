@@ -12,7 +12,7 @@ class Route:
             if part.startswith("{") and part.endswith("}"):
                 name = part[1:-1]
                 self.param_names.append(name)
-                pattern += r"/(?P<%s>[^/]+)" % name
+                pattern += rf"/(?P<{name}>[^/]+)"
             else:
                 pattern += f"/{part}"
         pattern += "$"
