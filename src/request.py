@@ -1,11 +1,13 @@
 import json
 from urllib.parse import parse_qs
+from .state import State
 
 class Request:
     def __init__(self, scope, receive):
         self.scope = scope
         self._receive = receive
         self._body = None
+        self.state = State()
 
     @property
     def method(self):
@@ -35,6 +37,5 @@ class Request:
         return self._body
     
     async def json(self):
-        print("dipanggil")
         body = await self.body()
         return json.loads(body.decode())

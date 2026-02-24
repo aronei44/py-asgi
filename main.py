@@ -1,11 +1,15 @@
 from src.app import App
+from src.depends import Depends
 from src.exceptions import NotFound
 from src.response import Response
-from middleware import logger_middleware, timing_middleware
+from middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
+from state import get_user
 
 app = App()
 app.add_middleware(logger_middleware)
 app.add_middleware(timing_middleware)
+app.add_middleware(test_state_middleware)
+app.add_middleware(auth_middleware)
 
 @app.route("GET", "/")
 async def index(request):
@@ -17,7 +21,7 @@ async def echo(request):
     return Response(body)
 
 @app.route("GET", "/users/{id}")
-async def get_user(id):
+async def get_users(id):
     if id != "1":
         raise NotFound("user not found")
 
@@ -27,3 +31,13 @@ async def get_user(id):
 async def search(q, page="1"):
     msg = f"q={q}, page={page}"
     return Response(msg.encode())
+
+@app.route("GET", "/state-test")
+async def state_test():
+    # request belum diinject ke handler param
+    # kita baca langsung dari middleware effect via closure
+    return Response(b"OK")
+
+@app.route("GET", "/me")
+async def me(user=Depends(get_user)):
+    return Response(user.encode())

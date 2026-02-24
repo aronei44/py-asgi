@@ -1,8 +1,10 @@
+import inspect
 from .request import Request
 from .response import Response
 from .router import Router
 from .route import Route
 from .middleware import error_middleware
+from .depends import Depends
 
 class App:
     def __init__(self):
@@ -30,12 +32,35 @@ class App:
         if not handler:
             return Response(b"Not Found", status=404)
 
-        params = {}
-        params.update(path_params or {})
-        params.update(request.query_params)
+        sig = inspect.signature(handler)
+        values = {}
 
-        result = handler(**params)
-        if hasattr(result, "__await__"):
+        for name, param in sig.parameters.items():
+
+            if param.annotation is Request:
+                values[name] = request
+                continue
+
+            if isinstance(param.default, Depends):
+                dep = param.default.dependency
+                dep_result = dep(request)
+
+                if inspect.isawaitable(dep_result):
+                    dep_result = await dep_result
+
+                values[name] = dep_result
+                continue
+
+            if path_params and name in path_params:
+                values[name] = path_params[name]
+                continue
+
+            if name in request.query_params:
+                values[name] = request.query_params[name]
+
+        result = handler(**values)
+
+        if inspect.isawaitable(result):
             result = await result
 
         return result

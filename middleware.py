@@ -23,3 +23,15 @@ def timing_middleware(next_handler):
         )
         return response
     return handler
+
+def test_state_middleware(next_handler):
+    async def wrapper(request):
+        request.state.test = "OK"
+        return await next_handler(request)
+    return wrapper
+
+def auth_middleware(next_handler):
+    async def wrapper(request):
+        request.state.user = "admin"
+        return await next_handler(request)
+    return wrapper
