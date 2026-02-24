@@ -6,6 +6,7 @@ class Router:
         self.prefix = prefix.rstrip("/")
         self.routes = []
         self.ws_routes = {}
+        self.middlewares = []
 
     def add(self, route):
         self.routes.append(route)
@@ -17,12 +18,14 @@ class Router:
                 return route.handler, params
         return None, None
 
+    # ---------- middleware ----------
+    def middleware(self, mw):
+        self.middlewares.append(mw)
+        return mw
+
     # ---------- websocket ----------
     def add_websocket(self, path, handler):
         self.ws_routes[path] = handler
-
-    def resolve_websocket(self, path):
-        return self.ws_routes.get(path)
 
     def match_websocket(self, path: str):
         handler = self.ws_routes.get(path)
@@ -33,6 +36,8 @@ class Router:
     # ---------- include router ----------
     def include_router(self, router, prefix=""):
         full_prefix = (self.prefix + prefix).rstrip("/")
+
+        self.middlewares.extend(router.middlewares)
 
         for route in router.routes:
             new_path = full_prefix + route.path

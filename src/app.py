@@ -1,6 +1,7 @@
 import inspect
 import json
 
+from src.exceptions import HTTPException
 from src.websocket import WebSocket
 from .request import Request
 from .response import Response
@@ -60,10 +61,7 @@ class App:
                     data = await request.json()
                     values[name] = param.annotation(**data)
                 except ValidationError as e:
-                    return Response(
-                        str(e).encode(),
-                        status=e.status
-                    )
+                    return Response(str(e).encode(), status=e.status)
                 except json.JSONDecodeError as e:
                     return Response(
                         str(e).encode() if self.debug else b"Invalid JSON body",
@@ -83,12 +81,23 @@ class App:
             if name in request.query_params:
                 values[name] = request.query_params[name]
 
-        result = handler(**values)
+        async def endpoint(req):
+            result = handler(**values)
+            if inspect.isawaitable(result):
+                result = await result
+            return result
 
-        if inspect.isawaitable(result):
-            result = await result
+        final_handler = endpoint
+        for mw in reversed(self.router.middlewares):
+            final_handler = await mw(final_handler)
+        try:
+            return await final_handler(request)
+        except HTTPException as e:
+            return Response(
+                body=e.detail.encode(),
+                status=e.status
+            )
 
-        return result
     
     def websocket(self, path):
         def decorator(fn):
@@ -113,6 +122,7 @@ class App:
         request = Request(scope, receive)
 
         handler = self.handle_request
+
         for mw in reversed(self.middlewares):
             handler = mw(handler)
 

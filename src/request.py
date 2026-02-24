@@ -8,6 +8,10 @@ class Request:
         self._receive = receive
         self._body = None
         self.state = State()
+        self.headers = {
+            k.decode().lower(): v.decode()
+            for k, v in scope.get("headers", [])
+        }
 
     @property
     def method(self):

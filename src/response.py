@@ -9,11 +9,15 @@ class Response:
         await send({
             "type": "http.response.start",
             "status": self.status,
-            "headers": self.headers,
+            "headers": [
+                (b"content-length", str(len(self.body)).encode()),
+                (b"content-type", b"text/plain"),
+            ] + self.headers
         })
         await send({
             "type": "http.response.body",
             "body": self.body,
+            "more_body": False
         })
         if self.background:
             await self.background.run()

@@ -3,7 +3,7 @@ from example.schema import UserIn
 from example.state import get_profile
 from src.background import BackgroundTask
 from src.depends import Depends
-from src.exceptions import NotFound
+from src.exceptions import HTTPException, NotFound
 from src.request import Request
 from src.response import Response
 from src.router import Router
@@ -11,6 +11,14 @@ from src.router import Router
 
 router = Router()
 
+@router.middleware
+async def auth(handler):
+    print("🔥 DIPANGGIL")
+    async def wrapped(req):
+        raise HTTPException(status=401,detail="Unauthorized")
+        # if req.headers.get("x-token") != "secret":
+        # return await handler(req)
+    return wrapped
 
 @router.get("/")
 async def index(request):
