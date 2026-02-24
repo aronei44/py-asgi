@@ -1,12 +1,13 @@
-from bg import send_email
 from src.app import App
 from src.background import BackgroundTask
 from src.depends import Depends
 from src.exceptions import NotFound
 from src.request import Request
 from src.response import Response
-from middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
-from state import get_profile
+
+from example.bg import send_email
+from example.middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
+from example.state import get_profile
 
 app = App()
 app.add_middleware(logger_middleware)
