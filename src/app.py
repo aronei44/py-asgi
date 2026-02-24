@@ -2,11 +2,14 @@ from .request import Request
 from .response import Response
 from .router import Router
 from .route import Route
+from .middleware import error_middleware
 
 class App:
     def __init__(self):
         self.router = Router()
-        self.middlewares = []
+        self.middlewares = [
+            error_middleware
+        ]
 
     def add_middleware(self, middleware):
         self.middlewares.append(middleware)

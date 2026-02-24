@@ -1,4 +1,5 @@
 from src.app import App
+from src.exceptions import NotFound
 from src.response import Response
 from middleware import logger_middleware, timing_middleware
 
@@ -17,7 +18,10 @@ async def echo(request):
 
 @app.route("GET", "/users/{id}")
 async def get_user(id):
-    return Response(f"user id = {id}".encode())
+    if id != "1":
+        raise NotFound("user not found")
+
+    return Response(b"user 1")
 
 @app.route("GET", "/search")
 async def search(q, page="1"):
