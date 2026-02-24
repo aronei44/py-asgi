@@ -4,7 +4,7 @@ from .response import Response
 from .router import Router
 from .route import Route
 from .middleware import error_middleware
-from .depends import Depends
+from .depends import Depends, resolve_dependency
 
 class App:
     def __init__(self):
@@ -42,13 +42,10 @@ class App:
                 continue
 
             if isinstance(param.default, Depends):
-                dep = param.default.dependency
-                dep_result = dep(request)
-
-                if inspect.isawaitable(dep_result):
-                    dep_result = await dep_result
-
-                values[name] = dep_result
+                values[name] = await resolve_dependency(
+                    param.default.dependency,
+                    request
+                )
                 continue
 
             if path_params and name in path_params:

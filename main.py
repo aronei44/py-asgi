@@ -1,9 +1,10 @@
 from src.app import App
 from src.depends import Depends
 from src.exceptions import NotFound
+from src.request import Request
 from src.response import Response
 from middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
-from state import get_user
+from state import get_profile
 
 app = App()
 app.add_middleware(logger_middleware)
@@ -16,7 +17,7 @@ async def index(request):
     return Response(b"Hello Router")
 
 @app.route("POST", "/echo")
-async def echo(request):
+async def echo(request: Request):
     body = await request.body()
     return Response(body)
 
@@ -39,5 +40,5 @@ async def state_test():
     return Response(b"OK")
 
 @app.route("GET", "/me")
-async def me(user=Depends(get_user)):
-    return Response(user.encode())
+async def me(profile=Depends(get_profile)):
+    return Response(profile.encode())
