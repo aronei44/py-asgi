@@ -1,10 +1,14 @@
+from .route import Route
 class Router:
     def __init__(self):
-        self.routes = {}
+        self.routes = []
 
-    def add(self, method: str, path: str, handler):
-        key = (method.upper(), path)
-        self.routes[key] = handler
+    def add(self, method, path, handler):
+        self.routes.append(Route(method, path, handler))
 
-    def match(self, method: str, path: str):
-        return self.routes.get((method.upper(), path))
+    def match(self, method, path):
+        for route in self.routes:
+            params = route.match(method, path)
+            if params is not None:
+                return route.handler, params
+        return None, None

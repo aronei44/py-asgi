@@ -17,12 +17,15 @@ class App:
             return
 
         request = Request(scope, receive)
-        handler = self.router.match(request.method, request.path)
+        handler, params = self.router.match(
+            request.method,
+            request.path
+        )
 
         if not handler:
             response = Response(b"Not Found", status=404)
         else:
-            result = handler(request)
+            result = handler(**params)
 
             if hasattr(result, "__await__"):
                 result = await result

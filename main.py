@@ -11,3 +11,7 @@ async def index(request):
 async def echo(request):
     body = await request.body()
     return Response(body)
+
+@app.route("GET", "/users/{id}")
+async def get_user(id):
+    return Response(f"user id = {id}".encode())
