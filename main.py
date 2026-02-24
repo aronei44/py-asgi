@@ -59,3 +59,13 @@ async def create_user(payload: UserIn):
     return Response(
         f"{payload.name}:{payload.age}".encode()
     )
+
+@app.websocket("/ws")
+async def ws_handler(ws):
+    await ws.accept()
+
+    while True:
+        msg = await ws.receive_text()
+        if msg is None:
+            break
+        await ws.send_text(f"echo: {msg}")

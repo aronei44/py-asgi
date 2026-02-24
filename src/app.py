@@ -1,5 +1,7 @@
 import inspect
 import json
+
+from src.websocket import WebSocket
 from .request import Request
 from .response import Response
 from .router import Router
@@ -87,11 +89,27 @@ class App:
             result = await result
 
         return result
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
+    
+    def websocket(self, path):
+        def decorator(fn):
+            self.router.add_websocket(path, fn)
+            return fn
+        return decorator
+    
+    async def handle_websocket(self, scope, receive, send):
+        event = await receive()
+        if event["type"] != "websocket.connect":
             return
 
+        ws = WebSocket(scope, receive, send)
+
+        try:
+            handler = self.router.match_websocket(scope["path"])
+            await handler(ws)
+        except Exception:
+            await ws.close(1011)
+
+    async def handle_http(self, scope, receive, send):
         request = Request(scope, receive)
 
         handler = self.handle_request
@@ -100,3 +118,11 @@ class App:
 
         response = await handler(request)
         await response.send(send)
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            await self.handle_http(scope, receive, send)
+        elif scope["type"] == 'websocket':
+            await self.handle_websocket(scope, receive, send)
+        else:
+            return
