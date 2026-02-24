@@ -1,7 +1,10 @@
 from src.app import App
 from src.response import Response
+from middleware import logger_middleware, timing_middleware
 
 app = App()
+app.add_middleware(logger_middleware)
+app.add_middleware(timing_middleware)
 
 @app.route("GET", "/")
 async def index(request):

@@ -8,6 +8,9 @@ class App:
         self.router = Router()
         self.middlewares = []
 
+    def add_middleware(self, middleware):
+        self.middlewares.append(middleware)
+
     def route(self, method, path):
         def decorator(fn):
             route = Route(method, path, fn)
