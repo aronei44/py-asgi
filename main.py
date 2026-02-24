@@ -1,3 +1,4 @@
+from example.schema import UserIn
 from src.app import App
 from src.background import BackgroundTask
 from src.depends import Depends
@@ -51,4 +52,10 @@ async def register():
     return Response(
         b"registered",
         background=BackgroundTask(send_email, to="test@mail.com")
+    )
+
+@app.route("POST", "/users")
+async def create_user(payload: UserIn):
+    return Response(
+        f"{payload.name}:{payload.age}".encode()
     )

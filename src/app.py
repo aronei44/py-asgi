@@ -1,13 +1,16 @@
 import inspect
+import json
 from .request import Request
 from .response import Response
 from .router import Router
 from .route import Route
 from .middleware import error_middleware
 from .depends import Depends, resolve_dependency
+from .schema import BaseModel, ValidationError
 
 class App:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.router = Router()
         self.middlewares = [
             error_middleware
@@ -46,6 +49,29 @@ class App:
                     param.default.dependency,
                     request
                 )
+                continue
+            if (
+                isinstance(param.annotation, type)
+                and issubclass(param.annotation, BaseModel)
+            ):
+                try:
+                    data = await request.json()
+                    values[name] = param.annotation(**data)
+                except ValidationError as e:
+                    return Response(
+                        str(e).encode(),
+                        status=e.status
+                    )
+                except json.JSONDecodeError as e:
+                    return Response(
+                        str(e).encode() if self.debug else b"Invalid JSON body",
+                        status=400
+                    )
+                except Exception as e:
+                    return Response(
+                        str(e).encode(),
+                        status=400
+                    )
                 continue
 
             if path_params and name in path_params:
