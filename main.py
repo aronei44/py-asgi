@@ -1,4 +1,6 @@
+from bg import send_email
 from src.app import App
+from src.background import BackgroundTask
 from src.depends import Depends
 from src.exceptions import NotFound
 from src.request import Request
@@ -42,3 +44,10 @@ async def state_test():
 @app.route("GET", "/me")
 async def me(profile=Depends(get_profile)):
     return Response(profile.encode())
+
+@app.route("POST", "/register")
+async def register():
+    return Response(
+        b"registered",
+        background=BackgroundTask(send_email, to="test@mail.com")
+    )
