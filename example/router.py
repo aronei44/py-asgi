@@ -11,24 +11,28 @@ from src.router import Router
 
 router = Router()
 
+# route middleware
 @router.middleware
 async def auth(handler):
     print("🔥 DIPANGGIL")
     async def wrapped(req):
-        raise HTTPException(status=401,detail="Unauthorized")
-        # if req.headers.get("x-token") != "secret":
-        # return await handler(req)
+        return await handler(req)
+        # contoh raisenya
+        # raise HTTPException(status=401,detail="Unauthorized")
     return wrapped
 
+# basic
 @router.get("/")
 async def index(request):
     return Response(b"Hello Router")
 
+# baca body
 @router.post("/echo")
 async def echo(request: Request):
     body = await request.body()
     return Response(body)
 
+# get path param
 @router.get("/users/{id}")
 async def get_users(id):
     if id != "1":
@@ -36,21 +40,18 @@ async def get_users(id):
 
     return Response(b"user 1")
 
+# get query param /search?q=1&page=2
 @router.get("/search")
 async def search(q, page="1"):
     msg = f"q={q}, page={page}"
     return Response(msg.encode())
 
-@router.get("/state-test")
-async def state_test():
-    # request belum diinject ke handler param
-    # kita baca langsung dari middleware effect via closure
-    return Response(b"OK")
-
+# depends
 @router.get("/me")
 async def me(profile=Depends(get_profile)):
     return Response(profile.encode())
 
+# background task run
 @router.post("/register")
 async def register():
     return Response(
@@ -58,6 +59,7 @@ async def register():
         background=BackgroundTask(send_email, to="test@mail.com")
     )
 
+# simple validasi payload
 @router.post("/users")
 async def create_user(payload: UserIn):
     return Response(

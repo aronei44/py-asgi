@@ -4,6 +4,7 @@ from src.app import App
 from example.middleware import logger_middleware, timing_middleware, test_state_middleware, auth_middleware
 
 app = App()
+# app middleware
 app.add_middleware(logger_middleware)
 app.add_middleware(timing_middleware)
 app.add_middleware(test_state_middleware)
@@ -11,7 +12,7 @@ app.add_middleware(auth_middleware)
 
 app.include_router(router, prefix="")
 
-
+# websocket
 @app.websocket("/ws")
 async def ws_handler(ws):
     await ws.accept()
