@@ -2,6 +2,19 @@
 
 Sebuah Framework hasil iseng mecut AI. Mencoba membuat mirip seperti FastAPI dengan base Uvicorn.
 
+## Fitur
+
+* [X] Run App
+* [X] Routing (GET, POST, PUT, DELETE)
+* [X] Middleware
+* [X] Payload (Body, Path param, Query param)
+* [X] Depends
+* [X] Websocket
+* [X] Background Execute
+* [X] Simple Payload Validation
+* [ ] OAS
+* [ ] Etc....
+
 ## Instalasi
 
 Clone project
@@ -22,18 +35,6 @@ Run Example
 uvicorn example.main:app
 ```
 
-## Fitur
-
-* [X] Run App
-* [X] Routing (GET, POST, PUT, DELETE)
-* [X] Middleware
-* [X] Payload (Body, Path param, Query param)
-* [X] Depends
-* [X] Websocket
-* [X] Background Execute
-* [X] Simple Payload Validation
-* [ ] OAS
-* [ ] Etc....
 
 ## Kontributor
 

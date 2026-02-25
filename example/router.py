@@ -14,7 +14,7 @@ router = Router()
 # route middleware
 @router.middleware
 async def auth(handler):
-    print("🔥 DIPANGGIL")
+    print("Middleware Called")
     async def wrapped(req):
         return await handler(req)
         # contoh raisenya
